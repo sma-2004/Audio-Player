@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Player</title>
+
+<style>
+        body {
+            background-color: black;
+        }
+
+	body, h1, li, button, #audio-name {
+    color: white;
+}
+
+
+	#prev, #next, #shuffle {
+    background-color: blue;
+    color: white; /* Change the text color to white for better visibility */
+}
+
+
+
+        #audio-player {
+            width: 100%;
+            max-width: 400px;
+	    /* Set the maximum width for your audio player */
+        }
+
+        #playlist li {
+            list-style: none;
+            padding: 10px;
+            /*border: 1px solid black;*/
+            margin: 5px;
+            background-color: black;
+            color: white;
+            cursor: pointer;
+	    display: inline-block;
+	    width: 100px;
+	    height: 100px;
+	    align-items: center;
+	    justify-content: center;
+	    text-align: center;
+
+        }
+
+	#playlist li.playing {
+    background: green; /* Change the background color to highlight the playing audio */
+}
+
+
+	#playlist img {
+             max-width: 95px;
+	     margin: 0 auto;
+	     display: block;
+	}
+
+        #playlist li:hover {
+            background: green;
+        }
+
+	#audio-controls {
+            display: flex;
+	    justify-content: center;
+	    align-items: center;
+	}
+
+    </style>
+
+
+</head>
+<body>
+
+      <h1>Audio Player</h1>
+  <audio id="audio-player" controls autoplay></audio>
+
+    <button id="prev">Previous</button>
+    <button id="next">Next</button>
+    <button id="shuffle">Shuffle</button> 
+    <div id="audio-name"></div>
+    <div id="now-playing">Now Playing:</div>
+
+
+
+     <ul id="playlist"></ul> 
+    
+
+    <script>
+const audioPlayer = document.getElementById('audio-player');
+const playlist = document.getElementById('playlist');
+const prevButton = document.getElementById('prev');
+const nextButton = document.getElementById('next');
+const shuffleButton = document.getElementById('shuffle');
+const audioNameDisplay = document.getElementById('now-playing');
+//audioNameDisplay.id = 'audio-name';
+//document.body.appendChild(audioNameDisplay);
+
+
+// Update your audioList with full URLs
+const audioList = [
+    'http://127.0.0.1:5000/audio/1.mp3',
+    'http://127.0.0.1:5000/audio/2.mp3',
+    'http://127.0.0.1:5000/audio/3.mp3',
+    'http://127.0.0.1:5000/audio/4.mp3',
+    'http://127.0.0.1:5000/audio/5.mp3',
+    'http://127.0.0.1:5000/audio/6.mp3',
+    'http://127.0.0.1:5000/audio/7.mp3',
+    'http://127.0.0.1:5000/audio/8.mp3',
+    'http://127.0.0.1:5000/audio/9.mp3',
+    'http://127.0.0.1:5000/audio/10.mp3',
+    'http://127.0.0.1:5000/audio/11.mp3',
+    'http://127.0.0.1:5000/audio/12.mp3',
+    'http://127.0.0.1:5000/audio/13.mp3',
+    'http://127.0.0.1:5000/audio/14.mp3',
+    'http://127.0.0.1:5000/audio/15.mp3',
+    'http://127.0.0.1:5000/audio/16.mp3',
+    'http://127.0.0.1:5000/audio/17.mp3',
+    'http://127.0.0.1:5000/audio/18.mp3',
+    'http://127.0.0.1:5000/audio/19.mp3',
+    'http://127.0.0.1:5000/audio/20.mp3',
+    'http://127.0.0.1:5000/audio/21.mp3',
+    'http://127.0.0.1:5000/audio/22.mp3',
+    'http://127.0.0.1:5000/audio/23.mp3',
+    'http://127.0.0.1:5000/audio/24.mp3',
+    'http://127.0.0.1:5000/audio/25.mp3',
+    'http://127.0.0.1:5000/audio/26.mp3',
+    'http://127.0.0.1:5000/audio/27.mp3',
+    'http://127.0.0.1:5000/audio/28.mp3',
+    'http://127.0.0.1:5000/audio/29.mp3',
+    'http://127.0.0.1:5000/audio/30.mp3',
+    'http://127.0.0.1:5000/audio/31.mp3',
+    'http://127.0.0.1:5000/audio/32.mp3',
+    'http://127.0.0.1:5000/audio/33.mp3',
+    'http://127.0.0.1:5000/audio/34.mp3',
+    'http://127.0.0.1:5000/audio/35.mp3',
+    'http://127.0.0.1:5000/audio/36.mp3',
+    'http://127.0.0.1:5000/audio/37.mp3',
+    'http://127.0.0.1:5000/audio/38.mp3',
+    'http://127.0.0.1:5000/audio/39.mp3',
+    'http://127.0.0.1:5000/audio/40.mp3',
+    'http://127.0.0.1:5000/audio/41.mp3',
+    'http://127.0.0.1:5000/audio/42.mp3',
+    'http://127.0.0.1:5000/audio/43.mp3',
+    'http://127.0.0.1:5000/audio/44.mp3',
+    'http://127.0.0.1:5000/audio/45.mp3',
+    'http://127.0.0.1:5000/audio/46.mp3',
+    'http://127.0.0.1:5000/audio/47.mp3',
+    'http://127.0.0.1:5000/audio/48.mp3',
+
+];
+
+const thumbnailList = [
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+'http://127.0.0.1:5000/photo/photo.jpeg',
+]	    
+
+// Function to extract audio file names from URLs
+function getAudioName(url) {
+    const parts = url.split('/');
+    return parts[parts.length - 1];
+}
+
+
+// Event listener for when audio ends or when you manually change the audio
+
+
+function populatePlaylist() {
+            audioList.forEach((audio, index) => {
+	    const audioName = getAudioName(audio);
+            const audioNameWithoutExtension = audioName.replace(/\..+$/, ''); // Remove the extension
+    
+	    const listItem = document.createElement('li');
+	    const thumbnail = document.createElement('img');
+	    thumbnail.src = thumbnailList[index];
+	    thumbnail.alt = audioName;
+	    listItem.textContent = audioNameWithoutExtension;
+	    listItem.appendChild(thumbnail);			
+	    listItem.addEventListener('click', () => {
+							                    currentAudioIndex = index;
+							                    loadAudio(currentAudioIndex);
+							                    playAudio();
+							                    updateAudioName();
+							                });
+		         playlist.appendChild(listItem);
+		                });
+			}
+
+populatePlaylist();	    
+
+let currentAudioIndex = 0;
+let isShuffle = false;
+
+function loadAudio(index) {
+    audioPlayer.src = audioList[index];
+    audioPlayer.load();
+}
+
+function playAudio() {
+    audioPlayer.play();
+}
+
+function pauseAudio() {
+    audioPlayer.pause();
+}
+
+function nextAudio() {
+    currentAudioIndex = (currentAudioIndex + 1) % audioList.length;
+    loadAudio(currentAudioIndex);
+    playAudio();
+}
+
+function prevAudio() {
+    currentAudioIndex = (currentAudioIndex - 1 + audioList.length) % audioList.length;
+    loadAudio(currentAudioIndex);
+    playAudio();
+}
+
+// Function to update the displayed audio name
+function updateAudioName() {
+
+const audioName1 = getAudioName(audioList[currentAudioIndex]);
+	const audioNameWithoutExtension1 = audioName1.replace(/\..+$/, ''); // Remove the extension
+
+    audioNameDisplay.textContent = `Now Playing: ${audioNameWithoutExtension1}`;
+
+    // Remove the "playing" class from all list items
+    const listItems = playlist.getElementsByTagName('li');
+    for (const listItem of listItems) {
+        listItem.classList.remove('playing');
+    }
+
+    // Add the "playing" class to the currently playing audio
+    listItems[currentAudioIndex].classList.add('playing');
+
+}
+
+ 
+
+// When the page loads, display the initial audio name
+updateAudioName();
+
+
+
+function getRandomIndex(currentIndex) {
+    let randomIndex;
+    do {
+        randomIndex = Math.floor(Math.random() * audioList.length);
+    } while (randomIndex === currentIndex);
+    return randomIndex;
+}
+
+
+shuffleButton.addEventListener('click', () => {
+    isShuffle = !isShuffle;
+    shuffleButton.style.backgroundColor = isShuffle ? 'green' : 'gray';
+    if (isShuffle) {
+        // If shuffle is enabled, immediately shuffle to a new song
+        const randomIndex = getRandomIndex(currentAudioIndex);
+        currentAudioIndex = randomIndex;
+        loadAudio(currentAudioIndex);
+        playAudio();
+	updateAudioName(); 
+    }
+});
+
+
+audioPlayer.addEventListener('ended', () => {
+    if (isShuffle) {
+        const randomIndex = Math.floor(Math.random() * audioList.length);
+        currentAudioIndex = randomIndex;
+        loadAudio(currentAudioIndex);
+        playAudio();
+    } else {
+        nextAudio();
+    }
+	updateAudioName();	    
+});
+
+	    prevButton.addEventListener('click', () => {prevAudio();
+updateAudioName();			});
+	    nextButton.addEventListener('click', () => {nextAudio();
+updateAudioName();			});
+shuffleButton.addEventListener('click', toggleShuffle);
+
+// Load and play the first audio
+loadAudio(currentAudioIndex);
+playAudio();
+
+
+// ... (previous code)
+
+/*const audioNameDisplay = document.createElement('div');
+audioNameDisplay.id = 'audio-name';
+document.body.appendChild(audioNameDisplay);
+
+
+// Function to update the displayed audio name
+function updateAudioName() {
+    const audioName = getAudioName(audioList[currentAudioIndex]);
+    audioNameDisplay.textContent = `Now Playing: ${audioName}`;
+
+    // Remove the "playing" class from all list items
+    const listItems = playlist.getElementsByTagName('li');
+    for (const listItem of listItems) {
+        listItem.classList.remove('playing');
+    }
+
+    // Add the "playing" class to the currently playing audio
+    listItems[currentAudioIndex].classList.add('playing');
+}*/
+
+
+// When the page loads, display the initial audio name
+//updateAudioName();
+
+
+audioPlayer.addEventListener('ended', () => {
+    if (isShuffle) {
+        const randomIndex = Math.floor(Math.random() * audioList.length);
+        currentAudioIndex = randomIndex;
+        loadAudio(currentAudioIndex);
+        playAudio();
+    } else {
+        nextAudio();
+    }
+    updateAudioName();
+});
+
+prevButton.addEventListener('click', () => {
+    prevAudio();
+    updateAudioName();
+});
+
+nextButton.addEventListener('click', () => {
+    nextAudio();
+    updateAudioName();
+});
+
+	    
+    </script>
+</body>
+</html>
+
